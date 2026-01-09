@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>我的私人打卡App</title>
+    <style>
+        body {
+            font-family: 'SF Pro Display', 'Helvetica Neue', 'PingFang SC', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            color: #333;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            text-align: center;
+            color: #1a1a1a;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            flex-grow: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .input-group button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-left: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s ease;
+        }
+
+        .input-group button:hover {
+            background-color: #0056b3;
+        }
+
+        .task-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .task-item {
+            background-color: #f9f9f9;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .task-item span {
+            flex-grow: 1;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .task-item .actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .task-item .actions .count {
+            margin-right: 15px;
+            font-size: 16px;
+            color: #666;
+        }
+
+        .task-item .actions button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 8px;
+        }
+
+        .task-item .actions .check-btn {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .task-item .actions .check-btn:hover {
+            background-color: #218838;
+        }
+
+        .task-item .actions .remove-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .task-item .actions .remove-btn:hover {
+            background-color: #c82333;
+        }
+
+        .stats {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .stats h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #1a1a1a;
+        }
+
+        .stats-item {
+            background-color: #f9f9f9;
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .stats-item h3 {
+            margin-top: 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .stats-item p {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .clear-data-btn {
+            display: block;
+            width: fit-content;
+            margin: 30px auto 0;
+            padding: 10px 20px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s ease;
+        }
+
+        .clear-data-btn:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>我的私人打卡</h1>
+
+        <div class="input-group">
+            <input type="text" id="newTaskInput" placeholder="添加新的打卡项...">
+            <button onclick="addTask()">添加</button>
+        </div>
+
+        <ul class="task-list" id="taskList">
+            </ul>
+
+        <div class="stats">
+            <h2>近7天打卡统计</h2>
+            <div id="statsList">
+                </div>
+        </div>
+
+        <button class="clear-data-btn" onclick="clearAllData()">清空所有数据</button>
+    </div>
+
+    <script>
+        const LOCAL_STORAGE_PREFIX = 'myHabitTracker_';
+        const TASKS_KEY = LOCAL_STORAGE_PREFIX + 'tasks';
+        const RECORDS_KEY = LOCAL_STORAGE_PREFIX + 'records';
+
+        let tasks = JSON.parse(localStorage.getItem(TASKS_KEY)) || [
+            "早起",
+            "阅读 30 分钟",
+            "喝水 8 杯"
+        ];
+        let records = JSON.parse(localStorage.getItem(RECORDS_KEY)) || {}; // { "任务名": ["2023-10-26 10:00:00", ...], ... }
+
+        function renderTasks() {
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = ''; // 清空现有列表
+
+            tasks.forEach(taskName => {
+                const taskItem = document.createElement('li');
+                taskItem.className = 'task-item';
+                
+                const taskRecords = records[taskName] || [];
+                const dailyCount = taskRecords.filter(record => {
+                    const recordDate = new Date(record).toDateString();
+                    const todayDate = new Date().toDateString();
+                    return recordDate === todayDate;
+                }).length;
+
+                taskItem.innerHTML = `
+                    <span>${taskName}</span>
+                    <div class="actions">
+                        <span class="count">今日：${dailyCount}次</span>
+                        <button class="check-btn" onclick="checkIn('${taskName}')">打卡</button>
+                        <button class="remove-btn" onclick="removeTask('${taskName}')">删除</button>
+                    </div>
+                `;
+                taskList.appendChild(taskItem);
+            });
+            renderStats(); // 每次渲染任务列表后更新统计
+        }
+
+        function addTask() {
+            const newTaskInput = document.getElementById('newTaskInput');
+            const taskName = newTaskInput.value.trim();
+            if (taskName && !tasks.includes(taskName)) {
+                tasks.push(taskName);
+                localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+                newTaskInput.value = '';
+                renderTasks();
+            } else if (tasks.includes(taskName)) {
+                alert('该打卡项已存在！');
+            }
+        }
+
+        function removeTask(taskName) {
+            tasks = tasks.filter(task => task !== taskName);
+            delete records[taskName]; // 同时删除该任务的打卡记录
+            localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+            localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
+            renderTasks();
+        }
+
+        function checkIn(taskName) {
+            if (!records[taskName]) {
+                records[taskName] = [];
+            }
+            const now = new Date();
+            records[taskName].push(now.toISOString()); // 使用ISO格式存储，方便排序和解析
+            localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
+            renderTasks(); // 重新渲染以更新今日次数和统计
+        }
+
+        function renderStats() {
+            const statsList = document.getElementById('statsList');
+            statsList.innerHTML = '';
+
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); // 计算7天前的日期
+
+            tasks.forEach(taskName => {
+                const taskRecords = records[taskName] || [];
+                let sevenDayCount = 0;
+
+                taskRecords.forEach(recordTime => {
+                    const recordDate = new Date(recordTime);
+                    if (recordDate >= sevenDaysAgo) {
+                        sevenDayCount++;
+                    }
+                });
+
+                const statsItem = document.createElement('div');
+                statsItem.className = 'stats-item';
+                statsItem.innerHTML = `
+                    <h3>${taskName}</h3>
+                    <p>近7天打卡次数：${sevenDayCount}次</p>
+                `;
+                statsList.appendChild(statsItem);
+            });
+        }
+
+        function clearAllData() {
+            if (confirm('确定要清空所有打卡数据和自定义项吗？此操作不可撤销！')) {
+                localStorage.removeItem(TASKS_KEY);
+                localStorage.removeItem(RECORDS_KEY);
+                tasks = ["早起", "阅读 30 分钟", "喝水 8 杯"]; // 重置为默认任务
+                records = {};
+                renderTasks();
+                alert('所有数据已清空！');
+            }
+        }
+
+        // 页面加载时执行
+        document.addEventListener('DOMContentLoaded', renderTasks);
+    </script>
+</body>
+</html>
