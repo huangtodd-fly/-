@@ -3,307 +3,285 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>我的私人打卡App</title>
+    <title>MY DAILY QUEST - 打卡系统</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Roboto+Condensed:wght@700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'SF Pro Display', 'Helvetica Neue', 'PingFang SC', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f0f0f0;
-            color: #333;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+        :root {
+            --primary-red: #E74C3C;
+            --primary-blue: #3448DB;
+            --primary-yellow: #F1C40F;
+            --comic-white: #ECF0F1;
+            --comic-black: #1A1A1A;
+            --bg-paper: #F4EBD0; /* 仿旧纸张色 */
         }
 
-        .container {
-            max-width: 600px;
-            margin: 20px auto;
+        body {
+            font-family: 'Roboto Condensed', sans-serif;
+            background-color: var(--bg-paper);
+            background-image: radial-gradient(var(--comic-black) 1px, transparent 0);
+            background-size: 20px 20px; /* 半色调点阵背景效果 */
+            background-alpha: 0.05;
+            color: var(--comic-black);
+            margin: 0;
             padding: 20px;
-            background-color: #fff;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 顶部标题栏 */
+        header {
+            width: 100%;
+            max-width: 500px;
+            background: var(--primary-yellow);
+            border: 4px solid var(--comic-black);
+            padding: 15px;
+            text-align: center;
+            box-shadow: 8px 8px 0px var(--comic-black);
+            margin-bottom: 30px;
+            transform: rotate(-1deg);
         }
 
         h1 {
-            text-align: center;
-            color: #1a1a1a;
-            margin-bottom: 30px;
+            font-family: 'Bangers', cursive;
+            font-size: 3rem;
+            margin: 0;
+            letter-spacing: 2px;
+            text-shadow: 3px 3px 0px white;
+            -webkit-text-stroke: 1px var(--comic-black);
         }
 
-        .input-group {
-            display: flex;
-            margin-bottom: 20px;
+        /* 任务卡片容器 */
+        .quest-container {
+            width: 100%;
+            max-width: 500px;
+            display: grid;
+            gap: 20px;
         }
 
-        .input-group input {
-            flex-grow: 1;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            outline: none;
-        }
-
-        .input-group button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin-left: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.2s ease;
-        }
-
-        .input-group button:hover {
-            background-color: #0056b3;
-        }
-
-        .task-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .task-item {
-            background-color: #f9f9f9;
-            margin-bottom: 10px;
+        /* 单个任务卡片 */
+        .quest-card {
+            background: white;
+            border: 3px solid var(--comic-black);
             padding: 15px;
-            border-radius: 10px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            position: relative;
+            box-shadow: 5px 5px 0px var(--primary-blue);
+            transition: transform 0.1s;
         }
 
-        .task-item span {
-            flex-grow: 1;
-            font-size: 18px;
-            font-weight: 500;
+        .quest-card:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px var(--comic-black);
         }
 
-        .task-item .actions {
-            display: flex;
-            align-items: center;
-        }
-
-        .task-item .actions .count {
+        .icon-box {
+            width: 80px;
+            height: 80px;
+            border: 3px solid var(--comic-black);
+            border-radius: 50%;
             margin-right: 15px;
-            font-size: 16px;
-            color: #666;
+            overflow: hidden;
+            background: var(--comic-white);
+            flex-shrink: 0;
         }
 
-        .task-item .actions button {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            margin-left: 8px;
+        .icon-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
-        .task-item .actions .check-btn {
-            background-color: #28a745;
-            color: white;
+        .quest-info {
+            flex-grow: 1;
         }
 
-        .task-item .actions .check-btn:hover {
-            background-color: #218838;
-        }
-
-        .task-item .actions .remove-btn {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        .task-item .actions .remove-btn:hover {
-            background-color: #c82333;
-        }
-
-        .stats {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-
-        .stats h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #1a1a1a;
-        }
-
-        .stats-item {
-            background-color: #f9f9f9;
-            margin-bottom: 10px;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-        }
-
-        .stats-item h3 {
-            margin-top: 0;
-            font-size: 18px;
-            color: #333;
-        }
-
-        .stats-item p {
-            font-size: 16px;
-            color: #666;
+        .quest-title {
+            font-family: 'Bangers', cursive;
+            font-size: 1.5rem;
             margin-bottom: 5px;
         }
 
-        .clear-data-btn {
-            display: block;
-            width: fit-content;
-            margin: 30px auto 0;
-            padding: 10px 20px;
-            background-color: #6c757d;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.2s ease;
+        /* 输入区域 */
+        .input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
         }
 
-        .clear-data-btn:hover {
-            background-color: #5a6268;
+        input, select {
+            border: 2px solid var(--comic-black);
+            padding: 5px;
+            font-family: 'Roboto Condensed';
+            font-weight: bold;
         }
+
+        .btn-checkin {
+            background: var(--primary-red);
+            color: white;
+            border: 3px solid var(--comic-black);
+            font-family: 'Bangers';
+            font-size: 1.2rem;
+            padding: 5px 15px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        /* 统计区域 */
+        .stats-section {
+            width: 100%;
+            max-width: 500px;
+            margin-top: 40px;
+            background: var(--comic-white);
+            border: 3px solid var(--comic-black);
+            padding: 20px;
+            box-shadow: 8px 8px 0px var(--comic-black);
+        }
+
+        .stats-title {
+            font-family: 'Bangers';
+            font-size: 2rem;
+            text-align: center;
+            border-bottom: 3px solid var(--comic-black);
+            margin-bottom: 15px;
+        }
+
+        .log-item {
+            border-bottom: 1px dashed var(--comic-black);
+            padding: 10px 0;
+            font-size: 0.9rem;
+        }
+
+        /* POP! 动画效果 */
+        @keyframes popOut {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2) rotate(5deg); }
+            100% { transform: scale(1); }
+        }
+
+        .pop-effect {
+            animation: popOut 0.3s ease-in-out;
+        }
+
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>我的私人打卡</h1>
 
-        <div class="input-group">
-            <input type="text" id="newTaskInput" placeholder="添加新的打卡项...">
-            <button onclick="addTask()">添加</button>
-        </div>
+    <header>
+        <h1>MY DAILY QUEST!</h1>
+    </header>
 
-        <ul class="task-list" id="taskList">
-            </ul>
-
-        <div class="stats">
-            <h2>近7天打卡统计</h2>
-            <div id="statsList">
+    <div class="quest-container">
+        <div class="quest-card" id="card-face">
+            <div class="icon-box"><img src="face.png" alt="FACE"></div>
+            <div class="quest-info">
+                <div class="quest-title">FACE YOGA!</div>
+                <div class="input-area">
+                    <input type="number" id="time-face" placeholder="时长(分钟)">
+                    <select id="feel-face">
+                        <option value="GREAT!">感觉棒极了!</option>
+                        <option value="TIRED">有点累</option>
+                        <option value="POWER!">充满力量!</option>
+                    </select>
+                    <button class="btn-checkin" onclick="checkIn('面部训练', 'face')">DONE!</button>
                 </div>
+            </div>
         </div>
 
-        <button class="clear-data-btn" onclick="clearAllData()">清空所有数据</button>
+        <div class="quest-card" id="card-waist">
+            <div class="icon-box"><img src="waist.png" alt="WAIST"></div>
+            <div class="quest-info">
+                <div class="quest-title">CORE POWER!</div>
+                <div class="input-area">
+                    <input type="number" id="time-waist" placeholder="时长(分钟)">
+                    <select id="feel-waist">
+                        <option value="GREAT!">感觉棒极了!</option>
+                        <option value="SORE">肌肉酸痛</option>
+                        <option value="BAM!">完成!</option>
+                    </select>
+                    <button class="btn-checkin" onclick="checkIn('腰部训练', 'waist')">DONE!</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="quest-card" id="card-shoulder">
+            <div class="icon-box"><img src="shoulder.png" alt="SHOULDER"></div>
+            <div class="quest-info">
+                <div class="quest-title">DELTA BLAST!</div>
+                <div class="input-area">
+                    <input type="number" id="time-shoulder" placeholder="时长(分钟)">
+                    <select id="feel-shoulder">
+                        <option value="GREAT!">感觉棒极了!</option>
+                        <option value="LEVEL UP!">升级了!</option>
+                    </select>
+                    <button class="btn-checkin" onclick="checkIn('肩部训练', 'shoulder')">DONE!</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="quest-card" id="card-study">
+            <div class="icon-box"><img src="study.png" alt="STUDY"></div>
+            <div class="quest-info">
+                <div class="quest-title">BRAIN GAINS!</div>
+                <div class="input-area">
+                    <input type="number" id="time-study" placeholder="时长(分钟)">
+                    <select id="feel-study">
+                        <option value="SMART!">变聪明了!</option>
+                        <option value="FOCUSED">专注</option>
+                    </select>
+                    <button class="btn-checkin" onclick="checkIn('学习打卡', 'study')">DONE!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-section">
+        <div class="stats-title">MISSION LOG</div>
+        <div id="log-container">
+            </div>
     </div>
 
     <script>
-        const LOCAL_STORAGE_PREFIX = 'myHabitTracker_';
-        const TASKS_KEY = LOCAL_STORAGE_PREFIX + 'tasks';
-        const RECORDS_KEY = LOCAL_STORAGE_PREFIX + 'records';
+        function checkIn(name, id) {
+            const time = document.getElementById(`time-${id}`).value;
+            const feel = document.getElementById(`feel-${id}`).value;
+            const date = new Date().toLocaleString();
 
-        let tasks = JSON.parse(localStorage.getItem(TASKS_KEY)) || [
-            "早起",
-            "阅读 30 分钟",
-            "喝水 8 杯"
-        ];
-        let records = JSON.parse(localStorage.getItem(RECORDS_KEY)) || {}; // { "任务名": ["2023-10-26 10:00:00", ...], ... }
-
-        function renderTasks() {
-            const taskList = document.getElementById('taskList');
-            taskList.innerHTML = ''; // 清空现有列表
-
-            tasks.forEach(taskName => {
-                const taskItem = document.createElement('li');
-                taskItem.className = 'task-item';
-                
-                const taskRecords = records[taskName] || [];
-                const dailyCount = taskRecords.filter(record => {
-                    const recordDate = new Date(record).toDateString();
-                    const todayDate = new Date().toDateString();
-                    return recordDate === todayDate;
-                }).length;
-
-                taskItem.innerHTML = `
-                    <span>${taskName}</span>
-                    <div class="actions">
-                        <span class="count">今日：${dailyCount}次</span>
-                        <button class="check-btn" onclick="checkIn('${taskName}')">打卡</button>
-                        <button class="remove-btn" onclick="removeTask('${taskName}')">删除</button>
-                    </div>
-                `;
-                taskList.appendChild(taskItem);
-            });
-            renderStats(); // 每次渲染任务列表后更新统计
-        }
-
-        function addTask() {
-            const newTaskInput = document.getElementById('newTaskInput');
-            const taskName = newTaskInput.value.trim();
-            if (taskName && !tasks.includes(taskName)) {
-                tasks.push(taskName);
-                localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
-                newTaskInput.value = '';
-                renderTasks();
-            } else if (tasks.includes(taskName)) {
-                alert('该打卡项已存在！');
+            if(!time) {
+                alert("PLEASE ENTER TIME, HERO!");
+                return;
             }
+
+            // 添加动画
+            const card = document.getElementById(`card-${id}`);
+            card.classList.add('pop-effect');
+            setTimeout(() => card.classList.remove('pop-effect'), 300);
+
+            // 存储数据
+            const record = { name, time, feel, date };
+            let history = JSON.parse(localStorage.getItem('hero_quest_logs')) || [];
+            history.unshift(record);
+            localStorage.setItem('hero_quest_logs', JSON.stringify(history.slice(0, 50))); // 只保留最近50条
+
+            renderLogs();
+            alert(`BOOM! ${name} 完成！`);
         }
 
-        function removeTask(taskName) {
-            tasks = tasks.filter(task => task !== taskName);
-            delete records[taskName]; // 同时删除该任务的打卡记录
-            localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
-            localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
-            renderTasks();
+        function renderLogs() {
+            const container = document.getElementById('log-container');
+            const history = JSON.parse(localStorage.getItem('hero_quest_logs')) || [];
+            
+            container.innerHTML = history.map(log => `
+                <div class="log-item">
+                    <strong>[${log.date}]</strong><br>
+                    ${log.name} - ${log.time}min - <span style="color:var(--primary-red)">${log.feel}</span>
+                </div>
+            `).join('');
         }
 
-        function checkIn(taskName) {
-            if (!records[taskName]) {
-                records[taskName] = [];
-            }
-            const now = new Date();
-            records[taskName].push(now.toISOString()); // 使用ISO格式存储，方便排序和解析
-            localStorage.setItem(RECORDS_KEY, JSON.stringify(records));
-            renderTasks(); // 重新渲染以更新今日次数和统计
-        }
-
-        function renderStats() {
-            const statsList = document.getElementById('statsList');
-            statsList.innerHTML = '';
-
-            const sevenDaysAgo = new Date();
-            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7); // 计算7天前的日期
-
-            tasks.forEach(taskName => {
-                const taskRecords = records[taskName] || [];
-                let sevenDayCount = 0;
-
-                taskRecords.forEach(recordTime => {
-                    const recordDate = new Date(recordTime);
-                    if (recordDate >= sevenDaysAgo) {
-                        sevenDayCount++;
-                    }
-                });
-
-                const statsItem = document.createElement('div');
-                statsItem.className = 'stats-item';
-                statsItem.innerHTML = `
-                    <h3>${taskName}</h3>
-                    <p>近7天打卡次数：${sevenDayCount}次</p>
-                `;
-                statsList.appendChild(statsItem);
-            });
-        }
-
-        function clearAllData() {
-            if (confirm('确定要清空所有打卡数据和自定义项吗？此操作不可撤销！')) {
-                localStorage.removeItem(TASKS_KEY);
-                localStorage.removeItem(RECORDS_KEY);
-                tasks = ["早起", "阅读 30 分钟", "喝水 8 杯"]; // 重置为默认任务
-                records = {};
-                renderTasks();
-                alert('所有数据已清空！');
-            }
-        }
-
-        // 页面加载时执行
-        document.addEventListener('DOMContentLoaded', renderTasks);
+        // 初始化加载
+        window.onload = renderLogs;
     </script>
 </body>
 </html>
